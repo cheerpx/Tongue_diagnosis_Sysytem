@@ -1,7 +1,7 @@
 import json
 import re
 
-from unet_keras.nets.unet import Unet as unet
+from nets.unet import Unet as unet
 from PIL import Image
 import numpy as np
 import colorsys
@@ -92,46 +92,28 @@ class Unet(object):
 
         image = Image.fromarray(np.uint8(seg_img)).resize((orininal_w, orininal_h))
         # 此时的image便是经过Unet网络预测的结果
-        filename = "./white_xy.txt"
+        x_test = []
+        y_test = []
         for x in range(orininal_w):
             for y in range(orininal_h):
                 if image.getpixel((x, y)) == (255, 255, 255):  # 取出所有白色的像素坐标
                     # print(x,y)
-                    numbers = []
-                    numbers.append(str(x) + "," + str(y))
+                    # 将白色的像素坐标都存起来，同时
+                    x_test.append(x)
+                    y_test.append(y)
+        print("x_test:", len(x_test))
+        print("写入白色像素点完毕！")
 
-                    file = open(filename, 'a+')
-                    for i in range(len(numbers)):
-                        file.write(str(numbers[i]) + '\n')
-        file.close()
-        plt.imshow(image)
-        plt.show()
 
         if self.blend:  # 两张图片相加
             # img = old_img×0.7+image×0.3
             image = Image.blend(old_img, image, 0.05)
 
-        # plt.imshow(image)
-        # plt.show()
-        x_test = []
-        y_test = []
 
-        f = open("./white_xy.txt")  # 返回一个文件对象
-        line = f.readline()  # 调用文件的 readline()方法
-        while line:
-            lineout = re.split('[,]+', line.strip())
-            x_test.append(lineout[0])
-            y_test.append(lineout[1])
-            line = f.readline()
-        print(x_test[0])
-        print(y_test[0])
-        print(len(x_test))
         for i in range(len(x_test)):
             image.putpixel((int(x_test[i]), int(y_test[i])), (255, 255, 255))
-        f.close()
-
-        with open("./white_xy.txt", 'r+') as ff:
-            ff.truncate(0)
         # plt.imshow(image)
         # plt.show()
         return image
+
+
